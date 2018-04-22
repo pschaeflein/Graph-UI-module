@@ -1,18 +1,25 @@
-﻿module.exports = {
+﻿var webpack = require('webpack'),
+  path = require('path');
+
+module.exports = {
+  mode: "development",
   entry: './Scripts/src/app.tsx',
   output: {
-    filename: 'Scripts/dist/app.js'
+    path: path.resolve(__dirname,'Scripts/dist'),
+    filename: 'app.js'
   },
   resolve: {
-    extensions: ['', '.webpack.js', '.web.js', '.ts', '.js', '.tsx']
+    extensions: ['.webpack.js', '.web.js', '.ts', '.js', '.tsx']
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.tsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'ts-loader'
       }
     ]
-  }
+  },
+  stats: "verbose"
+
 }

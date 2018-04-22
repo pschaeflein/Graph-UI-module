@@ -220,6 +220,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="package.json" />
+    <Content Include="Scripts\dist\app.js" />
     <Content Include="webpack.config.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -252,10 +253,11 @@
     <Content Include="Views\Account\PermissionsRequired.cshtml" />
     <Content Include="Views\Users\Index.cshtml" />
     <Content Include="tsconfig.json" />
+    <Content Include="Scripts\src\app.scss" />
+    <Content Include="Scripts\src\components\detailsList.scss" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Scripts\dist\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -269,6 +271,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\src\app.tsx" />
+    <TypeScriptCompile Include="Scripts\src\components\GroupList.tsx" />
     <TypeScriptCompile Include="Scripts\src\components\well.tsx" />
   </ItemGroup>
   <ItemGroup>
@@ -289,7 +292,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>10047</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

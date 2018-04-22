@@ -8,3 +8,4 @@ ReactDOM.render(
   </div>,
   document.getElementById("body")
 );
+
