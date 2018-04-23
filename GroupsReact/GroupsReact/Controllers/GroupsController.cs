@@ -41,7 +41,7 @@ namespace GroupsReact.Controllers
         {
           data.Add(new GroupViewModel
           {
-            Id = group.Id,
+            Key = group.Id,
             Description = group.Description,
             GroupType = String.Join(" ", group.GroupTypes),
             Name = group.DisplayName,

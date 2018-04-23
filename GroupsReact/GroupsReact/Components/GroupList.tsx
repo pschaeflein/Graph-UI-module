@@ -1,9 +1,17 @@
 ﻿import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {
+  IObjectWithKey,
+  ISelection,
+  Selection,
+  SelectionMode,
+  SelectionZone
+} from 'office-ui-fabric-react/lib/Selection';
+import {
   FocusZone,
   FocusZoneDirection
 } from 'office-ui-fabric-react/lib/FocusZone';
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import { List } from 'office-ui-fabric-react/lib/List';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { ColorClassNames, FontClassNames } from '@uifabric/styling';
@@ -11,10 +19,22 @@ import './GroupList.scss';
 
 export interface IGroupListState {
   items: Group[];
+  selection: ISelection;
+  selectionMode?: SelectionMode;
+  canSelect?: string;
+  showPanel: boolean;
 }
 
-export class Group {
-  id: string;
+export interface IGroupListItemProps {
+  item?: Group;
+  itemIndex?: number;
+  selection?: ISelection;
+  selectionMode?: SelectionMode;
+}
+
+export class Group implements IObjectWithKey {
+  key: string;
+  //  id: string;
   name: string;
   description: string;
   groupType: string;
@@ -23,40 +43,57 @@ export class Group {
   visibility: string;
 }
 
+
 export class GroupList extends React.Component<{}, IGroupListState> {
+  userId: string = null;
+  private _hasMounted: boolean;
+
   constructor(props: any) {
     super(props);
-    this.state = { items: [] };
-  }
 
-  userId: string = null;
+    this._hasMounted = false;
+    this._onSelectionChanged = this._onSelectionChanged.bind(this);
+    this._onItemInvoked = this._onItemInvoked.bind(this);
+
+
+    this.state = {
+      items: [],
+      selection: new Selection({ onSelectionChanged: this._onSelectionChanged }),
+      selectionMode: SelectionMode.single,
+      canSelect: 'all',
+      showPanel: false
+    };
+  }
 
   public componentDidMount() {
     this.userId = (window as any).userId;
-    let data:Group[] = (window as any).groupData;
+    let data: Group[] = (window as any).groupData;
+    this.state.selection.setItems(data, true);
     this.setState({
-      items:data
+      items: data
     });
 
     for (let item of data) {
-      this.getPicture(this.userId, item.id)
-        .then((pictureUrl) => this.updateStateItem(item.id, pictureUrl.photoUrl));
+      this.getPicture(this.userId, item.key)
+        .then((pictureUrl) => this.updateStateItem(item.key, pictureUrl.photoUrl));
     }
+
+    this._hasMounted = true;
   }
 
   componentWillUnmount() {
   }
 
-  updateStateItem(id: string, photoUrl:string) {
+  updateStateItem(id: string, photoUrl: string) {
     let items = [...this.state.items];
-    let item = { ...items.filter(i => i.id === id)[0] };
+    let item = { ...items.filter(i => i.key === id)[0] };
     item.thumbnail = photoUrl;
-    let index = items.map(function (e) { return e.id; }).indexOf(item.id);
+    let index = items.map(function (e) { return e.key; }).indexOf(item.key);
     items[index] = item;
-    this.setState({ items }); 
+    this.setState({ items: items });
   }
 
-  private getPicture(userId:string, id: string): Promise<any> {
+  private getPicture(userId: string, id: string): Promise<any> {
     return fetch('/Groups/Photo?id=' + id + '&userId=' + userId)
       .then((response) => response.json())
       .catch((reason) => {
@@ -64,23 +101,55 @@ export class GroupList extends React.Component<{}, IGroupListState> {
       });
   }
 
+  private _onSelectionChanged(): void {
+    console.log("onSelectionChanged");
+    if (this._hasMounted) {
+      this.forceUpdate();
+    }
+  }
+
+  private _onItemInvoked = (item: any, index: number): void => {
+    console.log('Item invoked', item, index);
+    this.setState({ showPanel: true });
+  }
+
+  private _onClosePanel = (): void => {
+    this.setState({ showPanel: false });
+  }
+
+
   public render() {
-    const { items } = this.state;
+    const { items, selection } = this.state;
     return (
-      <FocusZone direction={FocusZoneDirection.vertical}>
-        <div className='ms-ListGhostingExample-container' data-is-scrollable={true}>
-          <List
-            items={ items }
-            onRenderCell={this._onRenderCell}
-          />
-        </div>
-      </FocusZone>
+      <div>
+        <Panel
+          isOpen={this.state.showPanel}
+          type={PanelType.smallFixedFar}
+          onDismiss={this._onClosePanel}
+        >
+          This is a panel
+          </Panel>
+        <FocusZone direction={FocusZoneDirection.vertical}>
+          <SelectionZone
+            selection={selection}
+            // tslint:disable-next-line:jsx-no-lambda
+            onItemInvoked={this._onItemInvoked}
+          >
+            <div className='ms-ListGhostingExample-container' data-is-scrollable={true}>
+              <List
+                items={items}
+                onRenderCell={this._onRenderCell}
+              />
+            </div>
+          </SelectionZone>
+        </FocusZone>
+      </div>
     );
   }
 
   private _onRenderCell(item: any, index: number, isScrolling: boolean): JSX.Element {
     return (
-      <div className='ms-ListGhostingExample-itemCell' data-is-focusable={true}>
+      <div className='ms-ListGhostingExample-itemCell' data-is-focusable={true} data-selection-index={index} data-selection-invoke={true}>
         <Image
           className='ms-ListGhostingExample-itemImage'
           src={isScrolling ? undefined : item.thumbnail}

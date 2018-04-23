@@ -2,12 +2,15 @@
 import './site.css';
 import 'office-ui-fabric-react/dist/css/fabric.css';
 import { GroupList, Group, IGroupListState } from './GroupList';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+initializeIcons(/* optional base url */);
 
-// items actually used on this page
+// items actually used on _Layout partial
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Banner, IBannerProps } from './banner';
 import { NavMenu } from './NavMenu';
+import { Selection } from 'office-ui-fabric-react/lib/Selection';
 
 export function renderBanner(name: string, email: string, imageUrl: string) {
   ReactDOM.render(
@@ -24,7 +27,7 @@ export function renderNavMenu() {
 }
 
 export function RenderGroupList(groupList: Group[]) {
-  const props: IGroupListState = { items: groupList };
+  const props: IGroupListState = { items: groupList, selection: new Selection(), showPanel:false };
   ReactDOM.render(
     <GroupList></GroupList>,
     document.getElementById('react-groupList')
