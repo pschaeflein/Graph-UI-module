@@ -11,9 +11,10 @@ import {
   FocusZone,
   FocusZoneDirection
 } from 'office-ui-fabric-react/lib/FocusZone';
-import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import { List } from 'office-ui-fabric-react/lib/List';
 import { Image, ImageFit } from 'office-ui-fabric-react/lib/Image';
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
+import { GroupDetails } from './GroupDetails';
 import { ColorClassNames, FontClassNames } from '@uifabric/styling';
 import './GroupList.scss';
 
@@ -127,8 +128,8 @@ export class GroupList extends React.Component<{}, IGroupListState> {
           type={PanelType.smallFixedFar}
           onDismiss={this._onClosePanel}
         >
-          This is a panel
-          </Panel>
+          <GroupDetails />
+        </Panel>
         <FocusZone direction={FocusZoneDirection.vertical}>
           <SelectionZone
             selection={selection}

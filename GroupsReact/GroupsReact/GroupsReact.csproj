@@ -9,7 +9,8 @@
 
   <ItemGroup>
     <None Remove="Components\arrayFindPoly.js" />
-    <None Remove="Components\GroupList.tsx" />
+    <None Remove="Components\CommandBarTest.tsx" />
+    <None Remove="Components\GroupDetails.tsx" />
   </ItemGroup>
 
 
@@ -31,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="Components\GroupDetails.tsx" />
     <TypeScriptCompile Include="Components\GroupList.tsx" />
   </ItemGroup>
 
