@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace GroupsReact.Helpers
 {
-  public class SessionUserCache
+  public class InMemoryUserCache
   {
     private static readonly object MemLock = new object();
     private readonly string _cacheId;
     private readonly IMemoryCache _memoryCache;
     private UserModel _cache = new UserModel();
 
-    public SessionUserCache(string userId, IMemoryCache memoryCache)
+    public InMemoryUserCache(string userId, IMemoryCache memoryCache)
     {
       _cacheId = userId + "_UserCache";
       _memoryCache = memoryCache;

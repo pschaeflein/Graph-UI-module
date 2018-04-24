@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace GroupsReact.Models
 {
-  public class GroupViewModel
+  public class GroupListItemViewModel
   {
     public string Key { get; set; }
     public string Name { get; set; }

@@ -28,12 +28,12 @@ namespace GroupsReact.Controllers
 
     public UserModel GetUserModelFromCache(string userId)
     {
-      return new SessionUserCache(userId, _memoryCache).ReadUserStateValue();
+      return new InMemoryUserCache(userId, _memoryCache).ReadUserStateValue();
     }
 
     public void SaveUserModelInCache(UserModel userModel)
     {
-      new SessionUserCache(userModel.Id, _memoryCache).SaveUserStateValue(userModel);
+      new InMemoryUserCache(userModel.Id, _memoryCache).SaveUserStateValue(userModel);
     }
   }
 }

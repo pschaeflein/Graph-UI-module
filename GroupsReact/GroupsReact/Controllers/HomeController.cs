@@ -14,11 +14,13 @@ namespace GroupsReact.Controllers
   public class HomeController : ControllerBase
   {
     private readonly IGraphSdkHelper _graphSdkHelper;
+    private MSALLogCallback _msalLog;
 
-    public HomeController(IGraphSdkHelper graphSdkHelper, IMemoryCache memoryCache)
+    public HomeController(IGraphSdkHelper graphSdkHelper, IMemoryCache memoryCache, MSALLogCallback msalLog)
       : base(memoryCache)
     {
       _graphSdkHelper = graphSdkHelper;
+      _msalLog = msalLog;
     }
 
     public async Task<IActionResult> Index(string email)
@@ -62,6 +64,8 @@ namespace GroupsReact.Controllers
         }
 
         base.CopyUserModelToViewData(identifier);
+
+        System.Diagnostics.Debug.WriteLine(_msalLog.GetLog());
       }
 
       return View();

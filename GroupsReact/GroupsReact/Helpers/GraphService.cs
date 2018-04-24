@@ -204,12 +204,12 @@ namespace GroupsReact.Helpers
       }
     }
 
-    public static async Task<string> GetGroupPictureBase64(GraphServiceClient graphClient, string groupId, HttpContext httpContext)
+    public static async Task<string> GetGroupPictureBase64(GraphServiceClient graphClient, string groupId)
     {
       try
       {
         // Load group's profile picture.
-        var pictureStream = await GetGroupPictureStream(graphClient, groupId, httpContext);
+        var pictureStream = await GetGroupPictureStream(graphClient, groupId);
 
         // Copy stream to MemoryStream object so that it can be converted to byte array.
         var pictureMemoryStream = new MemoryStream();
@@ -238,37 +238,29 @@ namespace GroupsReact.Helpers
       }
     }
 
-    public static async Task<Stream> GetGroupPictureStream(GraphServiceClient graphClient, string groupId, HttpContext httpContext)
+    public static async Task<Stream> GetGroupPictureStream(GraphServiceClient graphClient, string groupId)
     {
       if (groupId == null) throw new Exception("GroupIdIsNull");
 
       Stream pictureStream = null;
-
-      try
-      {
-          // Load groups's profile picture.
-          pictureStream = await graphClient.Groups[groupId].Photo.Content.Request().GetAsync();
-      }
-      catch (ServiceException e)
-      {
-        switch (e.Error.Code)
-        {
-          case "Request_ResourceNotFound":
-          case "ResourceNotFound":
-          case "ErrorItemNotFound":
-          case "itemNotFound":
-          case "ErrorInvalidUser":
-            // If picture not found, return the default image.
-            throw new Exception("ResourceNotFound");
-          case "TokenNotFound":
-            await httpContext.ChallengeAsync();
-            return null;
-          default:
-            return null;
-        }
-      }
-
+      // Load groups's profile picture.
+      pictureStream = await graphClient.Groups[groupId].Photo.Content.Request().GetAsync();
       return pictureStream;
+    }
+
+    public static async Task<Group> GetGroupDetailsAsync(GraphServiceClient graphClient, string groupId)
+    {
+      if (groupId == null) throw new Exception("GroupIdIsNull");
+      var result = await graphClient.Groups[groupId].Request().GetAsync();
+      return result;
+    }
+
+    public static async Task<Drive> GetGroupDriveAsync(GraphServiceClient graphClient, string groupId)
+    {
+      if (groupId == null) throw new Exception("GroupIdIsNull");
+      var temp = await graphClient.Groups[groupId].Drive.Items.Request().GetAsync();
+      var result = await graphClient.Groups[groupId].Drive.Request().GetAsync();
+      return result;
     }
 
     // Send an email message from the current user.

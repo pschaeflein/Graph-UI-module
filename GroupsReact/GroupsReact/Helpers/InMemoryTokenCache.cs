@@ -10,14 +10,14 @@ using System.Text;
 namespace GroupsReact.Helpers
 {
     // Store the user's token information.
-    public class SessionTokenCache
+    public class InMemoryTokenCache
     {
         private static readonly object FileLock = new object();
         private readonly string _cacheId;
         private readonly IMemoryCache _memoryCache;
         private TokenCache _cache = new TokenCache();
 
-        public SessionTokenCache(string userId, IMemoryCache memoryCache)
+        public InMemoryTokenCache(string userId, IMemoryCache memoryCache)
         {
             // not object, we want the SUB
             _cacheId = userId + "_TokenCache";

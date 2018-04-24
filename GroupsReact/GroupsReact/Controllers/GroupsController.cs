@@ -14,18 +14,20 @@ namespace GroupsReact.Controllers
   public class GroupsController : ControllerBase
   {
     private readonly IGraphSdkHelper _graphSdkHelper;
+    private MSALLogCallback _msalLog;
 
-    public GroupsController(IGraphSdkHelper graphSdkHelper, IMemoryCache memoryCache)
+    public GroupsController(IGraphSdkHelper graphSdkHelper, IMemoryCache memoryCache, MSALLogCallback msalLog)
       : base(memoryCache)
     {
       _graphSdkHelper = graphSdkHelper;
+      _msalLog = msalLog;
     }
 
     [Authorize]
     // GET: Group
     public async Task<ActionResult> Index()
     {
-      List<GroupViewModel> data = new List<GroupViewModel>();
+      List<GroupListItemViewModel> data = new List<GroupListItemViewModel>();
 
       // Get user's id for token cache.
       var identifier = User.FindFirst(GraphAuthProvider.ObjectIdentifierType)?.Value;
@@ -39,7 +41,7 @@ namespace GroupsReact.Controllers
         var groupsData = await GraphService.GetGroups(graphClient, HttpContext);
         foreach (var group in groupsData)
         {
-          data.Add(new GroupViewModel
+          data.Add(new GroupListItemViewModel
           {
             Key = group.Id,
             Description = group.Description,
@@ -64,6 +66,7 @@ namespace GroupsReact.Controllers
         }
       }
 
+      System.Diagnostics.Debug.WriteLine(_msalLog.GetLog());
 
       return View(data);
     }
@@ -71,14 +74,13 @@ namespace GroupsReact.Controllers
     // GET Group/Photo
     public async Task<ActionResult> Photo(string id, string userId)
     {
-
       // Initialize the GraphServiceClient.
       var graphClient = _graphSdkHelper.GetAuthenticatedClient(userId);
 
       string pic = default(string);
       try
       {
-        pic = await GraphService.GetGroupPictureBase64(graphClient, id, HttpContext);
+        pic = await GraphService.GetGroupPictureBase64(graphClient, id);
       }
       catch (ServiceException e)
       {
@@ -92,8 +94,53 @@ namespace GroupsReact.Controllers
             break;
         }
       }
-      return Json(new { id = id, photoUrl = pic });
 
+      System.Diagnostics.Debug.WriteLine(_msalLog.GetLog());
+
+      return Json(new { id = id, photoUrl = pic });
+    }
+
+    // GET Group/Details
+    public async Task<ActionResult> Details(string id, string userId)
+    {
+      // Initialize the GraphServiceClient.
+      var graphClient = _graphSdkHelper.GetAuthenticatedClient(userId);
+
+      GroupModel details = null;
+      try
+      {
+        var group = await GraphService.GetGroupDetailsAsync(graphClient, id);
+
+        details = new GroupModel
+        {
+          Id = group.Id,
+          Classification = group.Classification,
+          CreatedDateTime = group.CreatedDateTime.Value,
+          Description = group.Description,
+          GroupType = String.Join(' ', group.GroupTypes),
+          Mail=group.Mail,
+          Name=group.DisplayName,
+          Visibility=group.Visibility
+        };
+
+        details.DriveWebUrl = (await GraphService.GetGroupDriveAsync(graphClient, id)).WebUrl;
+      }
+      catch (ServiceException e)
+      {
+        switch (e.Error.Code)
+        {
+          case "Authorization_RequestDenied":
+            return new RedirectResult("/Account/PermissionsRequired");
+          default:
+            //return JsonConvert.SerializeObject(new { Message = "An unknown error has occurred." }, Formatting.Indented);
+            var x = e.ToString();
+            break;
+        }
+      }
+
+      System.Diagnostics.Debug.WriteLine(_msalLog.GetLog());
+
+      return Json(details);
     }
   }
 }

@@ -14,10 +14,9 @@ namespace GroupsReact.Helpers
     private readonly IGraphAuthProvider _authProvider;
     private GraphServiceClient _graphClient;
 
-    public GraphSdkHelper(IGraphAuthProvider authProvider, MSALLogCallback logCallback)
+    public GraphSdkHelper(IGraphAuthProvider authProvider)
     {
       _authProvider = authProvider;
-      //Logger.LogCallback = logCallback.Log;
     }
 
     // Get an authenticated Microsoft Graph Service client.
@@ -31,9 +30,6 @@ namespace GroupsReact.Helpers
 
                   // Append the access token to the request
                   requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-                  // This header identifies the sample in the Microsoft Graph service. If extracting this code for your project please remove.
-                  requestMessage.Headers.Add("SampleID", "aspnetcore-connect-sample");
           }));
 
       return _graphClient;

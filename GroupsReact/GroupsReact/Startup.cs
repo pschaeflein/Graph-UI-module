@@ -52,7 +52,6 @@ namespace GroupsReact
 
       // This sample uses an in-memory cache for tokens and subscriptions. Production apps will typically use some method of persistent storage.
       services.AddMemoryCache();
-      services.AddSession();
 
       // Add application services.
       services.AddSingleton(Configuration);
@@ -62,11 +61,13 @@ namespace GroupsReact
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    public void Configure(IHostingEnvironment env, IApplicationBuilder app, IServiceProvider serviceProvider)
     {
       if (env.IsDevelopment())
       {
-        //app.UseBrowserLink();
+        var msalLogger = serviceProvider.GetService<MSALLogCallback>();
+        Microsoft.Identity.Client.Logger.LogCallback = msalLogger.Log;
+
         app.UseDeveloperExceptionPage();
         app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
         {

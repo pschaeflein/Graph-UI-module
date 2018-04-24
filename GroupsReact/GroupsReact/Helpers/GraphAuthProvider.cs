@@ -52,7 +52,7 @@ namespace GroupsReact.Helpers
     // Using password (secret) to authenticate. Production apps should use a certificate.
     public async Task<string> GetUserAccessTokenAsync(string userId)
     {
-      _userTokenCache = new SessionTokenCache(userId, _memoryCache).GetCacheInstance();
+      _userTokenCache = new InMemoryTokenCache(userId, _memoryCache).GetCacheInstance();
 
       var cca = new ConfidentialClientApplication(
           _appId,

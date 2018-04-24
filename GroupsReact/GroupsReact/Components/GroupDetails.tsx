@@ -52,71 +52,24 @@ export class GroupDetails extends React.Component<any, any> {
       ],
 
     };
-    const logoProps: IDocumentCardLogoProps = {
-      logoIcon: 'OutlookLogo'
-    };
 
     return (
       <div>
+        <h2>Group Information</h2>
         <h2>Group Activity</h2>
         <DocumentCard>
-          <DocumentCardPreview { ...previewProps } />
-          <DocumentCardLocation location='Marketing Documents' locationHref='http://microsoft.com' ariaLabel='Location, Marketing Documents' />
+          <DocumentCardLogo logoIcon='OneDrive'/>
           <DocumentCardTitle title='Latest Documents' />
-          <DocumentCardActivity
-            activity='Created Feb 23, 2016'
-            people={
-              [
-                { name: 'Annie Lindqvist', profileImageSrc: TestImages.personaFemale },
-                { name: 'Roko Kolar', profileImageSrc: '', initials: 'JH' },
-                { name: 'Greta Lundberg', profileImageSrc: TestImages.personaFemale }
-              ]
-            }
-          />
-          <DocumentCardActions
-            actions={
-              [
-                {
-                  iconProps: { iconName: 'Share' },
-                  onClick: (ev: any) => {
-                    console.log('You clicked the share action.');
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                  },
-                  ariaLabel: 'share action'
-                },
-                {
-                  iconProps: { iconName: 'Pin' },
-                  onClick: (ev: any) => {
-                    console.log('You clicked the pin action.');
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                  },
-                  ariaLabel: 'pin action'
-                },
-                {
-                  iconProps: { iconName: 'Ringer' },
-                  onClick: (ev: any) => {
-                    console.log('You clicked the ringer action.');
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                  },
-                  ariaLabel: 'ringer action'
-                },
-              ]
-            }
-            views={432}
-          />
+          <DocumentCardPreview { ...previewProps } />
+          <DocumentCardLocation location='View Library' locationHref='http://microsoft.com' ariaLabel='Location, Marketing Documents' />
         </DocumentCard>
 
         <br />
 
       <DocumentCard>
-        <DocumentCardLogo { ...logoProps } />
-        <div className='ms-ConversationTile-TitlePreviewArea' >
-          <DocumentCardTitle title='Conversation about anual report' shouldTruncate={true} />
+          <DocumentCardLogo logoIcon='OutlookLogo' />
+          <DocumentCardTitle title='Latest Conversation' shouldTruncate={true} />
           <DocumentCardTitle title='This is the email content preview, please feel free to give!' shouldTruncate={true} showAsSecondaryTitle={true} />
-        </div>
         <DocumentCardActivity
           activity='Sent March 13, 2018'
           people={
@@ -128,7 +81,9 @@ export class GroupDetails extends React.Component<any, any> {
               { name: 'Greta Lundberg', profileImageSrc: '', initials: 'GL' }
             ]
           }
-        />
+          />
+          <DocumentCardLocation location='View Inbox' locationHref='http://microsoft.com' ariaLabel='Group inbox' />
+
         </DocumentCard>
         </div>
     );

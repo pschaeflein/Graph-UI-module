@@ -106,7 +106,7 @@ namespace GroupsReact.Extensions
                 _azureOptions.ClientId,
                 redirectUri,
                 new ClientCredential(_azureOptions.ClientSecret),
-                new SessionTokenCache(identifier, memoryCache).GetCacheInstance(),
+                new InMemoryTokenCache(identifier, memoryCache).GetCacheInstance(),
                 null);
             var result = await cca.AcquireTokenByAuthorizationCodeAsync(code, graphScopes);
 

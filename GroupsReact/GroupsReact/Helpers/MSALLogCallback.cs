@@ -1,6 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,9 @@ namespace GroupsReact.Helpers
 
     public void Log(Logger.LogLevel level, string message, bool containsPii)
     {
-      log.AppendLine($"{level.ToString()} - {message}");
+      string requestId = Activity.Current?.Id;//?? HttpContext.TraceIdentifier,
+
+      log.AppendLine($"{requestId} - {level.ToString()} - {message}");
     }
 
   }
