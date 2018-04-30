@@ -12,7 +12,8 @@ export class NavMenu extends React.Component<{}, {}> {
         groups={[{
           links: [
             { name: 'Home', key: 'Home', url: '/' },
-            { name: 'Groups', key: 'Groups', url: '/Groups' }
+            { name: 'Groups', key: 'Groups', url: '/Groups' },
+            { name: 'Pickers', key: 'Pickers', url: '/Picker' }
           ]
         }]}
       />

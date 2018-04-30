@@ -3,6 +3,7 @@ import './site.css';
 import 'office-ui-fabric-react/dist/css/fabric.css';
 import { GroupList, Group, IGroupListState } from './GroupList';
 import { GroupDetails } from './GroupDetails';
+import { PeoplePicker } from './PeoplePicker';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 initializeIcons(/* optional base url */);
 
@@ -33,6 +34,14 @@ export function RenderGroupList(groupList: Group[]) {
     <GroupList></GroupList>,
     document.getElementById('react-groupList')
   );
+}
+
+export function RenderPeoplePicker() {
+  ReactDOM.render(
+    <PeoplePicker></PeoplePicker>,
+    document.getElementById('react-peoplePicker')
+  );
+
 }
 
 //renderBanner();

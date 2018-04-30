@@ -8,9 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Group\**" />
+    <Content Remove="Components\Group\**" />
+    <EmbeddedResource Remove="Components\Group\**" />
+    <None Remove="Components\Group\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Components\arrayFindPoly.js" />
     <None Remove="Components\CommandBarTest.tsx" />
-    <None Remove="Components\GroupDetails.tsx" />
+    <None Remove="Components\PeoplePicker.tsx" />
   </ItemGroup>
 
 
@@ -32,8 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="Components\GroupDetails.tsx" />
-    <TypeScriptCompile Include="Components\GroupList.tsx" />
+    <TypeScriptCompile Include="Components\PeoplePicker.tsx" />
   </ItemGroup>
 
   <Target Name="DebugRunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">

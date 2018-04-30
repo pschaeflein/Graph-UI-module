@@ -13,7 +13,7 @@ import {
   IDocumentCardLogoProps
 } from 'office-ui-fabric-react/lib/DocumentCard';
 import { ImageFit } from 'office-ui-fabric-react/lib/Image';
-import { TestImages } from './GroupDetailsTestImages';
+import { TestImages } from './TestImages';
 
 
 
@@ -55,7 +55,6 @@ export class GroupDetails extends React.Component<any, any> {
 
     return (
       <div>
-        <h2>Group Information</h2>
         <h2>Group Activity</h2>
         <DocumentCard>
           <DocumentCardLogo logoIcon='OneDrive'/>

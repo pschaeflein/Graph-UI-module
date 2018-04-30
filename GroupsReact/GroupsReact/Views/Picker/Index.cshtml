@@ -1,0 +1,22 @@
+﻿
+@{
+  ViewData["Title"] = "Pickers";
+}
+
+<h2>Pickers</h2>
+
+<div>
+  <h4>People Picker</h4>
+  <p>The People Picker provides for selecting a user. The control has many callback functions, allowing the developer to fully customize the experience.</p>
+  <div style="width:25%">
+    <div id="react-peoplePicker"></div>
+  </div>
+</div>
+
+@section scripts {
+  <script type="text/javascript">
+
+    App.RenderPeoplePicker();
+
+  </script>
+}

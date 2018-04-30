@@ -46,7 +46,7 @@ export class Group implements IObjectWithKey {
 
 
 export class GroupList extends React.Component<{}, IGroupListState> {
-  userId: string = null;
+  userId: string = "";
   private _hasMounted: boolean;
 
   constructor(props: any) {
