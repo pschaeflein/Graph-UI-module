@@ -10,10 +10,12 @@ import {
   DocumentCardLogo,
   DocumentCardStatus,
   IDocumentCardPreviewProps,
-  IDocumentCardLogoProps
+  IDocumentCardLogoProps,
+  DocumentCardType
 } from 'office-ui-fabric-react/lib/DocumentCard';
 import { ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { TestImages } from './TestImages';
+import { GroupCard } from './GroupCard';
 
 
 
@@ -55,6 +57,22 @@ export class GroupDetails extends React.Component<any, any> {
 
     return (
       <div>
+        <h2>Group Information</h2>
+        <DocumentCard>
+          <GroupCard />
+          <DocumentCardActions
+            actions={[
+              {
+                iconProps: { iconName: 'send' },
+                onClick: (ev: any) => {
+                  console.log('ShareA Action');
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                },
+                ariaLabel: 'share action'
+              }
+            ]}/>
+          </DocumentCard>
         <h2>Group Activity</h2>
         <DocumentCard>
           <DocumentCardLogo logoIcon='OneDrive'/>

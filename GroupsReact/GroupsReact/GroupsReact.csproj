@@ -17,6 +17,8 @@
   <ItemGroup>
     <None Remove="Components\arrayFindPoly.js" />
     <None Remove="Components\CommandBarTest.tsx" />
+    <None Remove="Components\GroupCard.tsx" />
+    <None Remove="Components\GroupCardExampleData.tsx" />
     <None Remove="Components\PeoplePicker.tsx" />
   </ItemGroup>
 
@@ -39,6 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="Components\GroupCard.tsx" />
+    <TypeScriptCompile Include="Components\GroupCardExampleData.tsx" />
     <TypeScriptCompile Include="Components\PeoplePicker.tsx" />
   </ItemGroup>
 

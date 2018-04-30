@@ -53,8 +53,8 @@ export class GroupList extends React.Component<{}, IGroupListState> {
     super(props);
 
     this._hasMounted = false;
-    this._onSelectionChanged = this._onSelectionChanged.bind(this);
-    this._onItemInvoked = this._onItemInvoked.bind(this);
+    //this._onSelectionChanged = this._onSelectionChanged.bind(this);
+    //this._onItemInvoked = this._onItemInvoked.bind(this);
 
 
     this.state = {
@@ -69,9 +69,11 @@ export class GroupList extends React.Component<{}, IGroupListState> {
   public componentDidMount() {
     this.userId = (window as any).userId;
     let data: Group[] = (window as any).groupData;
-    this.state.selection.setItems(data, true);
+    let sel: ISelection = new Selection({ onSelectionChanged: this._onSelectionChanged });
+    sel.setItems(data, true);
     this.setState({
-      items: data
+      items: data,
+      selection: sel
     });
 
     for (let item of data) {
