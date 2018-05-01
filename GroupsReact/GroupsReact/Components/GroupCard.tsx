@@ -1,19 +1,18 @@
 ﻿import * as React from 'react';
 import * as AdaptiveCards from "adaptivecards";
+import { IGroupDetailsProps } from './GroupDetails';
 import './GroupCard.scss';
-import { GroupCardExample } from './GroupCardExampleData';
 
-export class GroupCard extends React.Component<any, any> {
-  constructor(props: any) {
+export class GroupCard extends React.Component<IGroupDetailsProps, any> {
+  constructor(props: IGroupDetailsProps) {
     super(props);
-
-    this.state = {
-      card: GroupCardExample
-    };
   }
 
   render() {
-    const card = this.renderAdaptiveCard(this.state.card)
+    let card = "";
+    if (this.props.group.infoCard) {
+      card = this.renderAdaptiveCard(this.props.group.infoCard);
+    }
     return <div className="groupCard" dangerouslySetInnerHTML={{
       __html: card
     }} >

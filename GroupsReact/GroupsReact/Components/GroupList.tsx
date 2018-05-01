@@ -21,7 +21,6 @@ import './GroupList.scss';
 export interface IGroupListState {
   items: Group[];
   selection: ISelection;
-  selectionMode?: SelectionMode;
   canSelect?: string;
   showPanel: boolean;
 }
@@ -30,7 +29,6 @@ export interface IGroupListItemProps {
   item?: Group;
   itemIndex?: number;
   selection?: ISelection;
-  selectionMode?: SelectionMode;
 }
 
 export class Group implements IObjectWithKey {
@@ -42,6 +40,14 @@ export class Group implements IObjectWithKey {
   mailNickname: string;
   thumbnail: string;
   visibility: string;
+  createdDate: Date;
+  renewedDate: Date;
+  policy: string;
+  driveWebUrl: string;
+  mailboxWebUrl: string;
+  infoCard: string;
+  driveRecentItems: any[];
+  latestConversation: any;
 }
 
 
@@ -59,9 +65,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
 
     this.state = {
       items: [],
-      selection: new Selection({ onSelectionChanged: this._onSelectionChanged }),
-      selectionMode: SelectionMode.single,
-      canSelect: 'all',
+      selection: new Selection({ selectionMode: SelectionMode.single, onSelectionChanged: this._onSelectionChanged }),
       showPanel: false
     };
   }
@@ -69,7 +73,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
   public componentDidMount() {
     this.userId = (window as any).userId;
     let data: Group[] = (window as any).groupData;
-    let sel: ISelection = new Selection({ onSelectionChanged: this._onSelectionChanged });
+    let sel: ISelection = new Selection({ selectionMode: SelectionMode.single, onSelectionChanged: this._onSelectionChanged });
     sel.setItems(data, true);
     this.setState({
       items: data,
@@ -78,7 +82,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
 
     for (let item of data) {
       this.getPicture(this.userId, item.key)
-        .then((pictureUrl) => this.updateStateItem(item.key, pictureUrl.photoUrl));
+        .then((pictureUrl) => this.updateItemPhoto(item.key, pictureUrl.photoUrl));
     }
 
     this._hasMounted = true;
@@ -87,7 +91,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
   componentWillUnmount() {
   }
 
-  updateStateItem(id: string, photoUrl: string) {
+  updateItemPhoto(id: string, photoUrl: string) {
     let items = [...this.state.items];
     let item = { ...items.filter(i => i.key === id)[0] };
     item.thumbnail = photoUrl;
@@ -97,22 +101,51 @@ export class GroupList extends React.Component<{}, IGroupListState> {
   }
 
   private getPicture(userId: string, id: string): Promise<any> {
-    return fetch('/Groups/Photo?id=' + id + '&userId=' + userId)
+    return fetch('/api/Group/Photo?id=' + id + '&userId=' + userId)
       .then((response) => response.json())
       .catch((reason) => {
         console.log(reason);
       });
   }
 
-  private _onSelectionChanged(): void {
-    console.log("onSelectionChanged");
+  getDetails(userId: string, id: string) {
+    this.fetchDetails(userId, id)
+      .then((group: Group) => {
+        this.updateItemDetails(id, group);
+      });
+  }
+
+  private fetchDetails(userId: string, id: string): Promise<Group> {
+    return fetch('/api/Group/Details?id=' + id + '&userId=' + userId)
+      .then((response) =>
+        response.json())
+      .catch((reason) => {
+        console.log(reason);
+      });
+  }
+
+  updateItemDetails(id: string, group: Group) {
+    let items = [...this.state.items];
+    let item = { ...items.filter(i => i.key === id)[0] };
+    let index = items.map(function (e) { return e.key; }).indexOf(item.key);
+    items[index] = { ...group };
+    this.setState({ items: items });
     if (this._hasMounted) {
       this.forceUpdate();
     }
   }
 
-  private _onItemInvoked = (item: any, index: number): void => {
+  private _onSelectionChanged(): void {
+    console.log("_onSelectionChanged");
+    if (this._hasMounted) {
+      this.forceUpdate();
+    }
+  }
+
+  private _onItemInvoked = (item?: any, index?: number): void => {
     console.log('Item invoked', item, index);
+    this.state.selection.setKeySelected(item.key, true, false);
+    this.getDetails(this.userId, item.key);
     this.setState({ showPanel: true });
   }
 
@@ -123,6 +156,11 @@ export class GroupList extends React.Component<{}, IGroupListState> {
 
   public render() {
     const { items, selection } = this.state;
+    let selectedItem = {};
+    if (selection.count > 0) {
+      let selectedkey = selection.getSelection()[0].key;
+      selectedItem = items.filter(i => i.key === selectedkey)[0];
+    }
     return (
       <div>
         <Panel
@@ -130,7 +168,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
           type={PanelType.smallFixedFar}
           onDismiss={this._onClosePanel}
         >
-          <GroupDetails />
+          <GroupDetails group={selectedItem as Group} />
         </Panel>
         <FocusZone direction={FocusZoneDirection.vertical}>
           <SelectionZone
@@ -150,7 +188,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
     );
   }
 
-  private _onRenderCell(item: any, index: number, isScrolling: boolean): JSX.Element {
+  private _onRenderCell(item?: any, index?: number, isScrolling?: boolean): JSX.Element {
     return (
       <div className='ms-ListGhostingExample-itemCell' data-is-focusable={true} data-selection-index={index} data-selection-invoke={true}>
         <Image
@@ -162,7 +200,7 @@ export class GroupList extends React.Component<{}, IGroupListState> {
         />
         <div className='ms-ListGhostingExample-itemContent'>
           <div className='ms-ListGhostingExample-itemName ms-fontSize-l'>{item.name}</div>
-          <div className='ms-ListGhostingExample-itemIndex'>{item.mailNickname} {(item.visibility) ? '(' + item.visibility + ')' : ''}</div>
+          <div className='ms-ListGhostingExample-itemIndex'>{item.groupType} {(item.visibility) ? '(' + item.visibility + ')' : ''}</div>
         </div>
       </div>
     );

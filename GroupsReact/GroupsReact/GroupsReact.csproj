@@ -25,6 +25,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="AdaptiveCards" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
     <PackageReference Include="Microsoft.Graph" Version="1.8.1" />
     <PackageReference Include="microsoft.identity.client" Version="1.1.0-preview" />

@@ -255,12 +255,35 @@ namespace GroupsReact.Helpers
       return result;
     }
 
+    public static async Task<List<GroupLifecyclePolicy>> GetGroupPolicyAsync(GraphServiceClient graphClient, string groupId)
+    {
+      if (groupId == null) throw new Exception("GroupIdIsNull");
+      var result = await graphClient.Groups[groupId].GroupLifecyclePolicies.Request().GetAsync();
+      return result.CurrentPage as List<GroupLifecyclePolicy>;
+    }
+
     public static async Task<Drive> GetGroupDriveAsync(GraphServiceClient graphClient, string groupId)
     {
       if (groupId == null) throw new Exception("GroupIdIsNull");
-      var temp = await graphClient.Groups[groupId].Drive.Items.Request().GetAsync();
       var result = await graphClient.Groups[groupId].Drive.Request().GetAsync();
       return result;
+    }
+
+    public static async Task<List<DriveItem>> GetDriveRecentItemsAsync(GraphServiceClient graphClient, string driveId)
+    {
+      var itemRequest = await graphClient.Drives[driveId].Root.Children.Request().GetAsync();
+      var items = itemRequest.CurrentPage as List<DriveItem>;
+
+      var result = items.OrderByDescending(i => i.LastModifiedDateTime).Take(5).ToList();
+      return result;
+    }
+
+    internal static async Task<Conversation> GetGroupLatestConversationAsync(GraphServiceClient graphClient, string groupId)
+    {
+      if (groupId == null) throw new Exception("GroupIdIsNull");
+      var conversationRequest = await graphClient.Groups[groupId].Conversations.Request().GetAsync();
+      var conversations = conversationRequest.CurrentPage as List<Conversation>;
+      return conversations.OrderByDescending(c=>c.LastDeliveredDateTime).FirstOrDefault();
     }
 
     // Send an email message from the current user.

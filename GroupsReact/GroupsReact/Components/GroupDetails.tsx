@@ -11,98 +11,120 @@ import {
   DocumentCardStatus,
   IDocumentCardPreviewProps,
   IDocumentCardLogoProps,
-  DocumentCardType
+  DocumentCardType,
+  IDocumentCardPreviewImage
 } from 'office-ui-fabric-react/lib/DocumentCard';
 import { ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { TestImages } from './TestImages';
 import { GroupCard } from './GroupCard';
+import { Group, IGroupListState } from './GroupList';
+import { Icon, IconType } from 'office-ui-fabric-react/lib/Icon';
+
+export interface IGroupDetailsProps {
+  group: Group
+}
+
+export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
+  userId: string;
+
+  constructor(props: IGroupDetailsProps) {
+    super(props);
+  }
 
 
-
-export class GroupDetails extends React.Component<any, any> {
   public render() {
-    const previewProps: IDocumentCardPreviewProps = {
+    let recentDocs: IDocumentCardPreviewProps = {
       getOverflowDocumentCountText: (overflowCount: number) => `+${overflowCount} more`,
       previewImages: [
-        {
-          name: '2016 Conference Presentation',
-          url: 'http://bing.com',
-          previewImageSrc: TestImages.documentPreview,
-          iconSrc: TestImages.iconPpt,
-          imageFit: ImageFit.cover,
-          width: 318,
-          height: 196
-        },
-        {
-          name: 'New Contoso Collaboration for Conference Presentation Draft',
-          url: 'http://bing.com',
-          previewImageSrc: TestImages.documentPreviewTwo,
-          iconSrc: TestImages.iconPpt,
-          imageFit: ImageFit.cover,
-          width: 318,
-          height: 196
-        },
-        {
-          name: 'Spec Sheet for design',
-          url: 'http://bing.com',
-          previewImageSrc: TestImages.documentPreviewThree,
-          iconSrc: TestImages.iconPpt,
-          imageFit: ImageFit.cover,
-          width: 318,
-          height: 196
-        }
-      ],
-
+      ]
     };
+
+    let libraryActivity = null;
+    if (this.props.group.driveRecentItems && this.props.group.driveRecentItems.length > 1) {
+      let docs = this.props.group.driveRecentItems;
+      for (var i = 0; i < docs.length; i++) {
+        let iconName = "";
+        let fileName = "";
+        let fileParts = docs[i].name.split(".");
+        if (fileParts.length > 1) {
+          fileName = fileParts[0];
+          iconName = fileParts[1];
+        }
+        else {
+          fileName = docs[i].name;
+          iconName = "FabricFolder";
+        }
+        let previewImage: IDocumentCardPreviewImage = {
+          name: fileName,
+          url: docs[i]["@microsoft.graph.downloadUrl"],
+          iconSrc: `https://static2.sharepointonline.com/files/fabric/assets/brand-icons/document/svg/${iconName}_16x1_5.svg`
+        };
+        recentDocs.previewImages.push(previewImage);
+      }
+
+      libraryActivity = (
+        <DocumentCard>
+          <DocumentCardLogo logoIcon='OneDrive' />
+          <DocumentCardTitle title='Latest Documents' />
+          <DocumentCardPreview previewImages={recentDocs.previewImages} getOverflowDocumentCountText={recentDocs.getOverflowDocumentCountText} />
+          <DocumentCardLocation location='View Library' locationHref={this.props.group.driveWebUrl} />
+        </DocumentCard>
+      );
+    }
+
+    let mailboxActivity = null;
+    if (this.props.group.latestConversation) {
+      let convo = this.props.group.latestConversation;
+      let activityMessage = `Sent ${convo.lastDelivered}`;
+      let people = [];
+      for (var i = 0; i < convo.uniqueSenders.length; i++) {
+        people.push({ name: convo.uniqueSenders[i] });
+      }
+      mailboxActivity = (
+        <DocumentCard>
+          <DocumentCardLogo logoIcon='OutlookLogo' />
+          <DocumentCardTitle title='Latest Conversation' shouldTruncate={true} />
+          <DocumentCardTitle title={convo.topic} shouldTruncate={true} showAsSecondaryTitle={true} />
+          <DocumentCardActivity
+            activity={activityMessage}
+            people={people}
+          />
+          <DocumentCardLocation location='View Inbox' locationHref={this.props.group.mailboxWebUrl} ariaLabel='Group inbox' />
+        </DocumentCard>
+      );
+    }
+
+    const activity = (this.props.group.groupType === "Unified") ? (
+      <div>
+        <h2>Group Activity</h2>
+        {libraryActivity}
+        <br />
+        {mailboxActivity}
+      </div>
+    ) : (null);
 
     return (
       <div>
         <h2>Group Information</h2>
         <DocumentCard>
-          <GroupCard />
-          <DocumentCardActions
-            actions={[
-              {
-                iconProps: { iconName: 'send' },
-                onClick: (ev: any) => {
-                  console.log('ShareA Action');
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                },
-                ariaLabel: 'share action'
-              }
-            ]}/>
-          </DocumentCard>
-        <h2>Group Activity</h2>
-        <DocumentCard>
-          <DocumentCardLogo logoIcon='OneDrive'/>
-          <DocumentCardTitle title='Latest Documents' />
-          <DocumentCardPreview { ...previewProps } />
-          <DocumentCardLocation location='View Library' locationHref='http://microsoft.com' ariaLabel='Location, Marketing Documents' />
+          <GroupCard group={this.props.group} />
         </DocumentCard>
-
-        <br />
-
-      <DocumentCard>
-          <DocumentCardLogo logoIcon='OutlookLogo' />
-          <DocumentCardTitle title='Latest Conversation' shouldTruncate={true} />
-          <DocumentCardTitle title='This is the email content preview, please feel free to give!' shouldTruncate={true} showAsSecondaryTitle={true} />
-        <DocumentCardActivity
-          activity='Sent March 13, 2018'
-          people={
-            [
-              { name: 'Office 365 Groups Explorer', profileImageSrc: '' },
-              { name: 'MOD Administrator', profileImageSrc: ''             },
-              { name: 'Annie Lindqvist', profileImageSrc: '', initials: 'AL' },
-              { name: 'Roko Kolar', profileImageSrc: '', initials: 'RK' },
-              { name: 'Greta Lundberg', profileImageSrc: '', initials: 'GL' }
-            ]
-          }
-          />
-          <DocumentCardLocation location='View Inbox' locationHref='http://microsoft.com' ariaLabel='Group inbox' />
-
-        </DocumentCard>
-        </div>
+        {activity}
+      </div>
     );
+
+    //<DocumentCardActions
+    //  actions={[
+    //    {
+    //      iconProps: { iconName: 'send' },
+    //      onClick: (ev: any) => {
+    //        console.log('ShareA Action');
+    //        ev.preventDefault();
+    //        ev.stopPropagation();
+    //      },
+    //      ariaLabel: 'share action'
+    //    }
+    //  ]} />
+
   }
 }
