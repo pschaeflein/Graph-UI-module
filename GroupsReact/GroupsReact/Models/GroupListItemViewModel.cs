@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace GroupsReact.Models
+﻿namespace GroupsReact.Models
 {
   public class GroupListItemViewModel
   {

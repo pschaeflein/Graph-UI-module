@@ -5,12 +5,10 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Identity.Client;
 using Microsoft.Graph;
 using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Options;
 using GroupsReact.Extensions;
 

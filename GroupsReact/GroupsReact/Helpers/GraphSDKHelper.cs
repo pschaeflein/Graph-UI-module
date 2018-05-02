@@ -5,7 +5,6 @@
 
 using System.Net.Http.Headers;
 using Microsoft.Graph;
-using Microsoft.Identity.Client;
 
 namespace GroupsReact.Helpers
 {
