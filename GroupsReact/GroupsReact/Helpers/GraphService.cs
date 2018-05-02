@@ -274,8 +274,14 @@ namespace GroupsReact.Helpers
       var itemRequest = await graphClient.Drives[driveId].Root.Children.Request().GetAsync();
       var items = itemRequest.CurrentPage as List<DriveItem>;
 
-      var result = items.OrderByDescending(i => i.LastModifiedDateTime).Take(5).ToList();
+      var result = items.OrderByDescending(i => i.LastModifiedDateTime).Take(3).ToList();
       return result;
+    }
+
+    internal static async Task<string> GetDriveItemThumbnail(GraphServiceClient graphClient, string driveId, string driveItemId)
+    {
+      var thumbnail = await graphClient.Drives[driveId].Items[driveItemId].Thumbnails["0"]["medium"].Request().GetAsync();
+      return thumbnail.Url;
     }
 
     internal static async Task<Conversation> GetGroupLatestConversationAsync(GraphServiceClient graphClient, string groupId)

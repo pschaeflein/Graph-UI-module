@@ -17,8 +17,11 @@ import {
 import { ImageFit } from 'office-ui-fabric-react/lib/Image';
 import { TestImages } from './TestImages';
 import { GroupCard } from './GroupCard';
-import { Group, IGroupListState } from './GroupList';
-import { Icon, IconType } from 'office-ui-fabric-react/lib/Icon';
+import { Group, IGroupListState, DriveItem } from './GroupList';
+import { Icon, IconType, IIconProps } from 'office-ui-fabric-react/lib/Icon';
+import { initializeFileTypeIcons, getFileTypeIconProps, FileIconType } from '@uifabric/file-type-icons';
+import { GlobalSettings } from 'office-ui-fabric-react/lib/Utilities';
+initializeFileTypeIcons();
 
 export interface IGroupDetailsProps {
   group: Group
@@ -31,33 +34,71 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
     super(props);
   }
 
+  private getLibraryActivity(driveRecentItems: DriveItem[]): JSX.Element {
+    if (driveRecentItems == null || driveRecentItems.length == 0) {
+      return null;
+    }
 
-  public render() {
+    let libraryActivity: JSX.Element = null;
+
+    // hack until file-type-icons is resolved
+    let globalSettings = (window as any).__globalSettings__;
+
     let recentDocs: IDocumentCardPreviewProps = {
       getOverflowDocumentCountText: (overflowCount: number) => `+${overflowCount} more`,
       previewImages: [
       ]
     };
 
-    let libraryActivity = null;
-    if (this.props.group.driveRecentItems && this.props.group.driveRecentItems.length > 1) {
+
+    if (driveRecentItems.length == 1) {
+      const doc = driveRecentItems[0];
+      let iconProps: IIconProps = {};
+      switch (doc.fileType) {
+        case "folder":
+          iconProps = getFileTypeIconProps({ type: FileIconType.folder, size: 16 });
+          break;
+        default:
+          iconProps = getFileTypeIconProps({ extension: doc.fileType, size: 16 });
+          break;
+      }
+
+      let previewImage: IDocumentCardPreviewImage = {
+        name: doc.title,
+        url: doc.webUrl,
+        previewImageSrc: doc.thumbnailUrl,
+        iconSrc: globalSettings.icons[iconProps.iconName].code.props.src   // hack for file-type-icons
+      };
+      recentDocs.previewImages.push(previewImage);
+
+      libraryActivity = (
+        <DocumentCard>
+          <DocumentCardLogo logoIcon='OneDrive' />
+          <DocumentCardTitle title='Latest Documents' />
+          <DocumentCardPreview previewImages={recentDocs.previewImages} getOverflowDocumentCountText={recentDocs.getOverflowDocumentCountText} />
+          <DocumentCardTitle title={doc.title} shouldTruncate={true} />
+          <DocumentCardLocation location='View Library' locationHref={this.props.group.driveWebUrl} />
+        </DocumentCard>
+      );
+    }
+    else {
+
       let docs = this.props.group.driveRecentItems;
       for (var i = 0; i < docs.length; i++) {
-        let iconName = "";
-        let fileName = "";
-        let fileParts = docs[i].name.split(".");
-        if (fileParts.length > 1) {
-          fileName = fileParts[0];
-          iconName = fileParts[1];
+        let iconProps: IIconProps = {};
+        switch (docs[i].fileType) {
+          case "folder":
+            iconProps = getFileTypeIconProps({ type: FileIconType.folder, size: 16 });
+            break;
+          default:
+            iconProps = getFileTypeIconProps({ extension: docs[i].fileType, size: 16 });
+            break;
         }
-        else {
-          fileName = docs[i].name;
-          iconName = "FabricFolder";
-        }
+
         let previewImage: IDocumentCardPreviewImage = {
-          name: fileName,
-          url: docs[i]["@microsoft.graph.downloadUrl"],
-          iconSrc: `https://static2.sharepointonline.com/files/fabric/assets/brand-icons/document/svg/${iconName}_16x1_5.svg`
+          name: docs[i].title,
+          url: docs[i].webUrl,
+          iconSrc: globalSettings.icons[iconProps.iconName].code.props.src   // hack for file-type-icons
         };
         recentDocs.previewImages.push(previewImage);
       }
@@ -71,6 +112,13 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
         </DocumentCard>
       );
     }
+
+    return libraryActivity;
+  }
+
+  public render() {
+
+    const libraryActivity: JSX.Element = this.getLibraryActivity(this.props.group.driveRecentItems);
 
     let mailboxActivity = null;
     if (this.props.group.latestConversation) {

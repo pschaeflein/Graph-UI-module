@@ -13,6 +13,7 @@
     "@types/react": "^16.3.11",
     "@types/react-dom": "^16.0.5",
     "@types/webpack-env": "^1.13.0",
+    "@uifabric/file-type-icons": "^0.6.1",
     "@uifabric/styling": "^5.25.0",
     "adaptivecards": "1.0.0",
     "aspnet-webpack": "2.0.3",

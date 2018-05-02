@@ -85,7 +85,23 @@ namespace GroupsReact.Controllers
 
           var drive = await GraphService.GetGroupDriveAsync(graphClient, id);
           details.DriveWebUrl = drive.WebUrl;
-          details.DriveRecentItems = await GraphService.GetDriveRecentItemsAsync(graphClient, drive.Id);
+          var driveItems = await GraphService.GetDriveRecentItemsAsync(graphClient, drive.Id);
+
+          if (driveItems.Count == 1)
+          {
+            var graphDriveItem = driveItems[0];
+            var thumbnailUrl = await GraphService.GetDriveItemThumbnail(graphClient, drive.Id, graphDriveItem.Id);
+            var driveItem = new Models.DriveItem(graphDriveItem);
+            driveItem.ThumbnailUrl = thumbnailUrl;
+            details.DriveRecentItems.Add(driveItem);
+          }
+          if (driveItems.Count > 1)
+          {
+            foreach (var item in driveItems)
+            {
+              details.DriveRecentItems.Add(new Models.DriveItem(item));
+            }
+          }
 
           var convo = await GraphService.GetGroupLatestConversationAsync(graphClient, id);
           details.LatestConversation = new Models.Conversation
@@ -121,7 +137,7 @@ namespace GroupsReact.Controllers
 
       bool noPic = String.IsNullOrEmpty(group.Thumbnail);
 
-      if(!noPic)
+      if (!noPic)
       {
         AdaptiveColumn picCol = new AdaptiveColumn() { Width = AdaptiveColumnWidth.Auto };
         picCol.Items.Add(new AdaptiveImage() { Url = new Uri(group.Thumbnail), Size = AdaptiveImageSize.Small, Style = AdaptiveImageStyle.Default });
@@ -142,6 +158,14 @@ namespace GroupsReact.Controllers
       AdaptiveContainer factContainer = new AdaptiveContainer();
       AdaptiveFactSet factSet = new AdaptiveFactSet();
 
+      if (!String.IsNullOrEmpty(group.Classification))
+      {
+        factSet.Facts.Add(new AdaptiveFact()
+        {
+          Title = "Classification",
+          Value = group.Classification
+        });
+      }
       if (!String.IsNullOrEmpty(group.Visibility))
       {
         factSet.Facts.Add(new AdaptiveFact()

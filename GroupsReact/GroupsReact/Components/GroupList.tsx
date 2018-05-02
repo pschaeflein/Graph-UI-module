@@ -46,8 +46,22 @@ export class Group implements IObjectWithKey {
   driveWebUrl: string;
   mailboxWebUrl: string;
   infoCard: string;
-  driveRecentItems: any[];
-  latestConversation: any;
+  driveRecentItems: DriveItem[];
+  latestConversation: Conversation;
+}
+
+export class DriveItem {
+  title: string;
+  fileType: string;
+  webUrl: string;
+  thumbnailUrl: string;
+}
+
+export class Conversation {
+  topic: string;
+  lastDeliveredDateTime?: Date;
+  lastDelivered: string;
+  uniqueSenders: string[];
 }
 
 
