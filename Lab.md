@@ -1,192 +1,198 @@
-Install nvm (https://github.com/coreybutler/nvm-windows)
+# Lab: Smart UI with Microsoft Graph
 
-install node LTS
+In this lab, you will walk through building a web user interface with Office UI Fabric components and invoking Office 365 pickers for interacting with data from the Microsoft Graph.
 
-Launch VS
-  Tools | Options
-    Projects and Solutions
-      Web Package Management
-        External Web Tools
-  Move $(PATH) to top of list
+## In this lab
 
-install NPM task runner (https://marketplace.visualstudio.com/items?itemName=MadsKristensen.NPMTaskRunner)
+1. Using Office 365 Pickers
+1. Using Office UI Fabric Cards
+1. Render an Adaptive Card with data from Microsoft Graph
 
-> Maybe not...
-Install Yarn (npm install -g yarn) or (https://yarnpkg.com/latest.msi) or (choco install yarn)
-install Yarn installer (https://marketplace.visualstudio.com/items?itemName=MadsKristensen.YarnInstaller)
+## Prerequisites
 
-Visual Studio
-  Tools | Options
-    Web
-      Yarn Installer
-  Set **Install on Save** to Yes
+This lab will require an Office 365 tenant and a user account with the ability to grant administrative consent in the tenant.
 
-< Maybe not...
+### Install developer tools
 
-## Reference
-https://blogs.msdn.microsoft.com/webdev/2017/02/14/building-single-page-applications-on-asp-net-core-with-javascriptservices/
+The developer workstation requires the following tools for this lab.
 
+#### NodeJS
 
-## Developer command prompt
+Install [NodeJS](https://nodejs.org/en/) Long Term Support (LTS) version.
 
-mkdir GroupExplorer
-chdir GroupExplorer
-launch VS
+- If you have NodeJS already installed please check you have the latest version using node -v. It should return the current [LTS version](https://nodejs.org/en/download/).
 
-File>New Project
-  ASP.NET Core MVC
+After installing node, make sure npm is up to date by running following command:
 
-Edit csproj
-  add to <PropertyGroup>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-  add Targets from SpaServices
-    <Target Name="DebugRunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">
-      <!-- Ensure Node.js is installed -->
-      <Exec Command="node --version" ContinueOnError="true">
-        <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-      </Exec>
-      <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+````shell
+npm install -g npm
+````
 
-      <!-- In development, the dist files won't exist on the first run or when cloning to
-           a different machine, so rebuild them if not already present. -->
-      <Message Importance="high" Text="Performing first-run Webpack build..." />
-      <Exec Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js" />
-      <Exec Command="node node_modules/webpack/bin/webpack.js" />
-    </Target>
+Configure Visual Studio to use the NodeJS version you installed instead of the version included in the Visual Studio install:
 
-    <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-      <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-      <Exec Command="npm install" />
-      <Exec Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js --env.prod" />
-      <Exec Command="node node_modules/webpack/bin/webpack.js --env.prod" />
+1. Click **Tools > Options**.
+1. Expand **Projects and Solutions > Web Package Management**.
+1. Click on **External Web Tools**.
+1. Select the entry **$(PATH)**.
+1. Click the up arrow to make this entry first in the list.
 
-      <!-- Include the newly-built files in the publish output -->
-      <ItemGroup>
-        <DistFiles Include="wwwroot\dist\**" />
-        <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-          <RelativePath>%(DistFiles.Identity)</RelativePath>
-          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        </ResolvedFileToPublish>
-      </ItemGroup>
-    </Target>
+![Screenshot of External Web Tools dialog in Visual Studio](./images/ExternalWebTools.jpg)
 
-remove bundleconfig.json
-Add tsconfig.json
+#### NPM Task Runner for Visual Studio
 
-Add webpack.config.js
+Install [NPM task runner](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.NPMTaskRunner)
 
-Add package.json
-  DevDependencies
-    "@types/prop-types": "15.5.2",
-    "@types/react": "^16.3.11",
-    "@types/react-dom": "^16.0.5",
-    "@types/webpack-env": "1.13.0",
-    "aspnet-webpack": "^2.0.3",
-    "awesome-typescript-loader": "3.2.1",
-    "css-loader": "0.28.4",
-    "extract-text-webpack-plugin": "2.1.2",
-    "office-ui-fabric-react": "5.82.3",
-    "react": "16.3.2",
-    "react-dom": "^16.3.2",
-    "typescript": "2.4.1",
-    "webpack": "2.5.1",
-    "webpack-hot-middleware": "2.18.2",
+#### Azure Active Directory (Azure AD) Tenant Id
 
+The application created in this lab requires the id of the tenant in which the application is registered. Use the support article [Find your Office 365 tenant ID](https://support.office.com/en-us/article/find-your-office-365-tenant-id-6891b561-a52d-4ade-9f39-b492285e2c9b) to obtain the id.
 
-==================================
-Helpers from connect sample
-  updates to AzureADOptions
-install-package microsoft.identity.client -IncludePrerelease
-===================================
-Open Views\Home\Index.cshtml
-  Update div tag tag, adding class attribute:
-    <div id="react-app" class="ms-Fabric">Loading...</div>
-Open ClientApp\boot.tsx
-  remove bootstrap
-  add
-    import 'office-ui-fabric-react/dist/css/fabric.css';
-Open ClientApp\components\Layout.tsx
-  replace entire render method:
-     public render() {
-      return <div className='ms-Grid'>
-        <div className='ms-Grid-row'>
-          <div className='ms-Grid-col ms-sm3'>
-            <NavMenu />
-          </div>
-          <div className='ms-Grid-col ms-sm9'>
-            {this.props.children}
-          </div>
-        </div>
-      </div>;
+## Exercise 1. Using Office 365 Pickers
+
+In this exercise, you will extend an ASP.NET Core application to use pickers provided by Office 365 services.
+
+### Register an application in AAD
+
+To enable an application to call the Microsoft Graph, an application registration is required. This lab uses the [Azure Active Directory v2.0 endpoint](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-compare).
+
+1. Open a browser to the url **https://apps.dev.microsoft.com**
+1. Log in with a Work or School account.
+1. Click **Add an app**
+1. Complete the **Register your application** section, entering an Application name. Clear the checkbox for Guided Setup. Click **Create**
+
+    ![](Images/Exercise1-01.png)
+
+1. On the registration page, in the **Application Secrets** section, click **Generate New Password**. Copy the generated password for future use.
+
+    ![](Images/Exercise1-02.png)
+
+1. On the registration page, in the **Platforms** section, click **Add Platform**.
+1. In the **Add Platform** dialog, click **Web**.
+1. Enter a **Redirect URL** to the callback page file. For this lab, use the value `https://localhost:44313/OneDriveFilePickerCallback.html`
+
+1. Click the **Add URL** button.
+1. Enter a **Redirect URL** for the implicit flow callback. For this lab, use the value `https://localhost:44313/signin-oidc'
+1. Click the **Add URL** button again.
+1. Enter a **Redirect URL** for the admin consent callback. For this lab, use the value `https://localhost:44313/Account/AADTenantConnected'
+
+    ![](Images/Exercise1-03.png)
+
+1. Click **Save**.
+1. Make note of the Application Id. This value is used in the authentication / token code.
+1. Scroll down to the **Microsoft Graph Permissions** section.
+1. Next to **Delegated Permissions**, click the **Add** button.
+1. In the **Select Permission** dialog, scroll down and select the following Scopes:
+    1. **email**
+    1. **Group.Read.All**
+    1. **offline_access**
+    1. **openid**
+    1. **profile**
+1. Click **OK**.
+
+    ![](Images/Exercise1-04.png)
+
+    1. Click **Save**.
+
+### Update application configuration
+
+1. Open the starter application. The started application is a Visual Studio solution that can be found at `LabFiles\StarterProject\GraphUI.sln`.
+1. Open the `appSettings.json` file.
+1. Update the following properties, specifying the values from the app registration process.
+
+  ```json
+    "Domain": "[yourdomain.onmicrosoft.com]",
+    "TenantId": "[your-tenant-id]",
+    "ClientId": "[your-client-id]",
+    "ClientSecret": "[your-client-secret]",
+  ```
+
+### Provide administrative consent to application
+
+1. Press F5 to run the application.
+1. When prompted, log in with your Work or School account and grant consent to the application.
+1. The application will load the **Permission Required** page. Reading Groups from the tenant requires administrative consent, and must be performed via a specific endpoint. Click the **Connect your tenant** link.
+1. Log in with an account that has administrative privileges in the tenant.
+1. On the administrative consent dialog, click **Accept**.
+1. The app will then display the Home page.
+1. Stop debugging
+
+### Add the OneDrive File Picker
+OneDrive provides File pickers for Android and JavaScript. This lab uses the JavaScript version. Additional information is available on the [reference page](https://docs.microsoft.com/en-us/onedrive/developer/controls/file-pickers/js-v72/).
+
+The File picker requires a control for the user to invoke the picker, and a callback page to receive the requested information from OneDrive. Create the callback page by performing these steps:
+
+1. In Solution Explorer, right-click on the **wwwroot** folder and choose **Add > New Item...**
+1. Select the **HTML Page** template. Name file `OneDriveFilePickerCallback.html`
+
+    ![](Images/Exercise1-05.png)
+
+1. Replace the contents of the file the following statements:
+
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+    <script type="text/javascript"  src="https://js.live.net/v7.2/OneDrive.js"></script>
+  </html>
+  ```
+
+1. Save and close the file.
+1. Open the file `Views\Picker\Index.cshtml`
+1. Notice that line 12 contains a button with a JavaScript handler for the click event.
+1. At the bottom of the page, at line 29, is a Razor section named **scripts**. Add the following tag inside the **scripts** section to load the File picker control.
+
+  ```javascript
+  <script type="text/javascript" src="https://js.live.net/v7.2/OneDrive.js"></script>
+  ```
+
+1. Add the following code after the `OneDrive.js` script tag. (The code is available in the `LabFiles\Pickers\OneDriveFilePicker.js` file):
+
+> **NOTE:** In the script, there is a token called [your-client-id]. Replace this token with the client id of the application registered during the setup of this lab. This is the same id as used in the `appSettings.json` file.
+
+  ```javascript
+  <script type="text/javascript">
+    function launchOneDrivePicker() {
+      var ClientID = "[your-client-id]";
+
+      var odOptions = {
+        clientId: ClientID,
+        action: "query",
+        multiSelect: false,
+        advanced: {
+          queryParameters: "select=id,name,size,file,folder,photo,@@microsoft.graph.downloadUrl",
+          redirectUri: 'https://localhost:44313/OneDriveFilePickerCallback.html'
+        },
+        success: function (files) {
+          var data = files;
+          var fileName = data.value[0]["name"];
+          var filePath = data.value[0]["@@microsoft.graph.downloadUrl"];
+
+          document.getElementById('selectedFileName').innerHTML = '<strong>' + fileName + '</strong>';
+          document.getElementById('selectedFileUrl').innerText = filePath.substr(0, filePath.indexOf('tempauth') + 15) + '...';
+        },
+        cancel: function () {
+          /* cancel handler */
+        },
+        error: function (e) {
+          /* error handler */
+          alert(e);
+        }
+      };
+      OneDrive.open(odOptions);
     }
+  </script>
+  ```
 
-Open ClientApp\components\Counter.tsx
-  replace constructor:
-    constructor(props: RouteComponentProps<{}>) {
-        super(props);
-        this.state = { currentCount: 0 };
-    }
+1. Run the application.
+1. Click on the **Pickers** link in the left-side navigation.
+1. Click the **Select from OneDrive** button.
+1. The File picker has a set of permissions that it requires. The app registration performed in this lab does not include those permissions, so you will need to log in and grant consent to your OneDrive for Business library.
+1. After consenting, the File picker renders in dialog window.
 
-Open ClientApp\components\FetchData.tsx
-  replace constructor:
-    constructor(props: RouteComponentProps<{}>) {
-    super(props);
-        this.state = { forecasts: [], loading: true };
+    ![](Images/Exercise1-06.png)
 
-        fetch('api/SampleData/WeatherForecasts')
-            .then(response => response.json() as Promise<WeatherForecast[]>)
-            .then(data => {
-                this.setState({ forecasts: data, loading: false });
-            });
-    }
-
-Open ClientApp\components\NavMenu.tsx
-  remove import of 'react-router-dom'
-  Add import of Office UI Fabric:
-    import { Nav, INavProps } from 'office-ui-fabric-react/lib/Nav';
-  Add constructor:
-    constructor(props: INavProps) {
-      super(props);
-    }
-  Replace render method:
-    public render() {
-      return (
-        <Nav
-          groups={[{
-            links: [
-              { name: 'Home', key: 'Home', url: '/' },
-              { name: 'Counter', key: 'Counter', url: '/counter' },
-              { name: 'Fetch data', key: 'FetchData', url: '/fetchdata' },
-            ]
-          }]}
-        />
-      );
-    }
+1. Select a file and click **Open**.
+1. The File picker will close the dialog and call the `success` callback, passing the requested information.
 
 
-Add Microsoft.AspNetCore.Authentication.OpenIdConnect package
+## Exercise 2
 
-AppReg
-  GroupManager in SCMVP:
-    Tenant Domain: scmvp.net
-    Tenant ID: 5b952ff1-536f-430c-86a2-06f37793e021
-    App ID: b1c56465-1f5a-4191-87a8-86519583f1da
-
-  GroupsReact in SCMVP
-    TenantId: "5b952ff1-536f-430c-86a2-06f37793e021",
-    ClientId "c56c4bb4-0737-40b3-a0d3-0f99aeff6056",
-    ClientSecret: Ga0p85VenEer7Yx4A6Gk/7M0UXf+wFIzUvT8KOMtw5w=
-
-  GroupsReact2 (apps.dev.microsoft.com using admin@scmvp.net)
-    ClientId: a7b38ffc-86e1-4b13-868b-9173b69122bf
-    Pwd: tqqVPHWVO893-(sinbS49[}
-
-  GroupsReact3 (apps.dev.microsoft.com using admin@scmvp.net)
-    ClientId: 82c6fb97-8b40-4ee9-bef6-021c1b4e4fbc
-    Pwd: rlwalWSKBQ4{:anLJ7812;[
-
-
-npm install --save @uifabric/styling
-
-
-IDX10205: Issuer validation failed. Issuer: 'https://login.microsoftonline.com/5b952ff1-536f-430c-86a2-06f37793e021/v2.0'. Did not match: validationParameters.ValidIssuer: 'null' or validationParameters.ValidIssuers: 'https://sts.windows.net/5b952ff1-536f-430c-86a2-06f37793e021/, https://sts.windows.net/5b952ff1-536f-430c-86a2-06f37793e021/'.
+Add persona  banner.tsx
