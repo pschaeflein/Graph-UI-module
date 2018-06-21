@@ -59,11 +59,11 @@ To enable an application to call the Microsoft Graph, an application registratio
 1. Click **Add an app**
 1. Complete the **Register your application** section, entering an Application name. Clear the checkbox for Guided Setup. Click **Create**
 
-    ![](Images/Exercise1-01.png)
+    ![Screenshot of Application Registration Portal page](Images/Exercise1-01.png)
 
 1. On the registration page, in the **Application Secrets** section, click **Generate New Password**. Copy the generated password for future use.
 
-    ![](Images/Exercise1-02.png)
+    ![Screenshot of Application Secrets section of the Application Registration Portal page](Images/Exercise1-02.png)
 
 1. On the registration page, in the **Platforms** section, click **Add Platform**.
 1. In the **Add Platform** dialog, click **Web**.
@@ -74,7 +74,7 @@ To enable an application to call the Microsoft Graph, an application registratio
 1. Click the **Add URL** button again.
 1. Enter a **Redirect URL** for the admin consent callback. For this lab, use the value `https://localhost:44313/Account/AADTenantConnected'
 
-    ![](Images/Exercise1-03.png)
+    ![Screenshot of Platform section of the Application Registration Portal page](Images/Exercise1-03.png)
 
 1. Click **Save**.
 1. Make note of the Application Id. This value is used in the authentication / token code.
@@ -88,7 +88,7 @@ To enable an application to call the Microsoft Graph, an application registratio
     1. **profile**
 1. Click **OK**.
 
-    ![](Images/Exercise1-04.png)
+    ![Screenshot of Microsoft Graph Permissions section of the Application Registration Portal page](Images/Exercise1-04.png)
 
     1. Click **Save**.
 
@@ -123,7 +123,7 @@ The File picker requires a control for the user to invoke the picker, and a call
 1. In Solution Explorer, right-click on the **wwwroot** folder and choose **Add > New Item...**
 1. Select the **HTML Page** template. Name file `OneDriveFilePickerCallback.html`
 
-    ![](Images/Exercise1-05.png)
+    ![Screenshot of Visual Studio solution explorer, highlighting the wwwroot folder](Images/Exercise1-05.png)
 
 1. Replace the contents of the file the following statements:
 
@@ -187,10 +187,33 @@ The File picker requires a control for the user to invoke the picker, and a call
 1. The File picker has a set of permissions that it requires. The app registration performed in this lab does not include those permissions, so you will need to log in and grant consent to your OneDrive for Business library.
 1. After consenting, the File picker renders in dialog window.
 
-    ![](Images/Exercise1-06.png)
+    ![Screenshot of OneDrive File picker dialog](Images/Exercise1-06.png)
 
 1. Select a file and click **Open**.
 1. The File picker will close the dialog and call the `success` callback, passing the requested information.
+
+    ![Screenshot of Picker page of the application, including data return from the OneDrive File Picker](Images/Exercise1-07.png)
+
+### Add the Office UI Fabric People Picker
+Office UI Fabric provides a People Picker component written in React. For detailed information about the components, refer to the [Office UI Fabric documentation](http://dev.office.com/fabric). The starter project in the lab is pre-configured to use React, following the principles of the [create-react-app utility](https://reactjs.org/docs/add-react-to-a-new-app.html#create-react-app). In the lab, you will extend the application to use the [sample people picker from Office UI Fabric](https://developer.microsoft.com/en-us/fabric#/components/peoplepicker).
+
+1. In Solution Explorer, right-click on the **Components** folder and choose **Add > New Item...**
+1. Select the **TypeScript JSX File** template. Name file `PeoplePickerExampleData.tsx`.
+1. Replace the contents of the template with the code from the file `LabFiles\Pickers\PeoplePickerExampleData.tsx`.
+1. In Solution Explorer, right-click on the **Components** folder and choose **Add > New Item...**
+1. Select the **TypeScript JSX File** template. Name file `PeoplePicker.tsx`.
+1. Replace the contents of the template with the code from the file `LabFiles\Pickers\PeoplePicker.tsx`.
+1. Open the file `Views\Picker\Index.cshtml`
+1. Notice that line 25 contains a div with the id `react-peoplePicker`. This is the location in the page in which the control will be rendered.
+1. Inside the **scripts** section, add the following line:
+
+  ```javascript
+  App.RenderPeoplePicker();
+  ```
+
+> The `RenderPeoplePicker` method is defined in the `boot.tsx` file. The webpack configuration specifies that the TypeScript in the project is injected into pages as a library object named `App`.
+
+  ![Screenshot of Picker page with People Picker control](Images/Exercise1-08.png)
 
 
 ## Exercise 2
