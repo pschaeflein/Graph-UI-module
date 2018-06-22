@@ -28,8 +28,7 @@ export function renderNavMenu() {
   );
 }
 
-export function RenderGroupList(groupList: Group[]) {
-  const props: IGroupListState = { items: groupList, selection: new Selection(), showPanel:false };
+export function RenderGroupList() {
   ReactDOM.render(
     <GroupList></GroupList>,
     document.getElementById('react-groupList')
