@@ -41,7 +41,6 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
 
     let libraryActivity: JSX.Element = null;
 
-    // hack until file-type-icons is resolved
     let globalSettings = (window as any).__globalSettings__;
 
     let recentDocs: IDocumentCardPreviewProps = {
@@ -50,19 +49,11 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
       ]
     };
 
+    let documentCardDocTitle: JSX.Element = null;
 
     if (driveRecentItems.length == 1) {
       const doc = driveRecentItems[0];
-      let iconProps: IIconProps = {};
-      switch (doc.fileType) {
-        case "folder":
-          iconProps = getFileTypeIconProps({ type: FileIconType.folder, size: 16 });
-          break;
-        default:
-          iconProps = getFileTypeIconProps({ extension: doc.fileType, size: 16 });
-          break;
-      }
-
+      let iconProps: IIconProps = this.getIconProps((doc.fileType));
       let previewImage: IDocumentCardPreviewImage = {
         name: doc.title,
         url: doc.webUrl,
@@ -70,16 +61,7 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
         iconSrc: globalSettings.icons[iconProps.iconName].code.props.src   // hack for file-type-icons
       };
       recentDocs.previewImages.push(previewImage);
-
-      libraryActivity = (
-        <DocumentCard>
-          <DocumentCardLogo logoIcon='OneDrive' />
-          <DocumentCardTitle title='Latest Documents' />
-          <DocumentCardPreview previewImages={recentDocs.previewImages} getOverflowDocumentCountText={recentDocs.getOverflowDocumentCountText} />
-          <DocumentCardTitle title={doc.title} shouldTruncate={true} />
-          <DocumentCardLocation location='View Library' locationHref={this.props.group.driveWebUrl} />
-        </DocumentCard>
-      );
+      documentCardDocTitle = <DocumentCardTitle title={doc.title} shouldTruncate={true} />;
     }
     else {
 
@@ -102,45 +84,64 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
         };
         recentDocs.previewImages.push(previewImage);
       }
-
-      libraryActivity = (
-        <DocumentCard>
-          <DocumentCardLogo logoIcon='OneDrive' />
-          <DocumentCardTitle title='Latest Documents' />
-          <DocumentCardPreview previewImages={recentDocs.previewImages} getOverflowDocumentCountText={recentDocs.getOverflowDocumentCountText} />
-          <DocumentCardLocation location='View Library' locationHref={this.props.group.driveWebUrl} />
-        </DocumentCard>
-      );
     }
+
+    libraryActivity = (
+      <DocumentCard>
+        <DocumentCardLogo logoIcon='OneDrive' />
+        <DocumentCardTitle title='Latest Documents' />
+        <DocumentCardPreview previewImages={recentDocs.previewImages} getOverflowDocumentCountText={recentDocs.getOverflowDocumentCountText} />
+        {documentCardDocTitle}
+        <DocumentCardLocation location='View Library' locationHref={this.props.group.driveWebUrl} />
+      </DocumentCard>
+    );
 
     return libraryActivity;
   }
 
-  public render() {
+  private getIconProps(fileSuffix: string): IIconProps {
+    let iconProps: IIconProps = {};
 
-    const libraryActivity: JSX.Element = this.getLibraryActivity(this.props.group.driveRecentItems);
+    switch (fileSuffix) {
+      case "folder":
+        iconProps = getFileTypeIconProps({ type: FileIconType.folder, size: 16 });
+        break;
+      default:
+        iconProps = getFileTypeIconProps({ extension: fileSuffix, size: 16 });
+        break;
+    }
+    return iconProps;
+  }
 
+  private getMailboxActivity(latestConversation: Conversation, mailboxWebUrl: string): JSX.Element {
     let mailboxActivity = null;
-    if (this.props.group.latestConversation) {
-      let convo = this.props.group.latestConversation;
-      let activityMessage = `Sent ${convo.lastDelivered}`;
+    if (latestConversation) {
+      let activityMessage = `Sent ${latestConversation.lastDelivered}`;
       let people = [];
-      for (var i = 0; i < convo.uniqueSenders.length; i++) {
-        people.push({ name: convo.uniqueSenders[i] });
+      for (var i = 0; i < latestConversation.uniqueSenders.length; i++) {
+        people.push({ name: latestConversation.uniqueSenders[i] });
       }
       mailboxActivity = (
         <DocumentCard>
           <DocumentCardLogo logoIcon='OutlookLogo' />
           <DocumentCardTitle title='Latest Conversation' shouldTruncate={true} />
-          <DocumentCardTitle title={convo.topic} shouldTruncate={true} showAsSecondaryTitle={true} />
+          <DocumentCardTitle title={latestConversation.topic} shouldTruncate={true} showAsSecondaryTitle={true} />
           <DocumentCardActivity
             activity={activityMessage}
             people={people}
           />
-          <DocumentCardLocation location='View Inbox' locationHref={this.props.group.mailboxWebUrl} ariaLabel='Group inbox' />
+          <DocumentCardLocation location='View Inbox' locationHref={mailboxWebUrl} ariaLabel='Group inbox' />
         </DocumentCard>
       );
     }
+    return mailboxActivity;
+  }
+
+  public render() {
+    const group = this.props.group;
+
+    const libraryActivity: JSX.Element = this.getLibraryActivity(this.props.group.driveRecentItems);
+
 
     const activity = (this.props.group.groupType === "Unified") ? (
       <div>

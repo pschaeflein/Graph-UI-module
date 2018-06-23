@@ -15,6 +15,7 @@ export class GroupDetails extends React.Component<IGroupDetailsProps, any> {
   }
 
   public render() {
+    const group = this.props.group;
     return (
       <div>
         <h2>{this.props.group.name}</h2>
